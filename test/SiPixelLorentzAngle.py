@@ -9,7 +9,6 @@ from FWCore.ParameterSet.VarParsing import VarParsing
 options = VarParsing ('analysis')
 options.register( "outName", "lorentzangle.root", VarParsing.multiplicity.singleton, VarParsing.varType.string, "name and path of the output files (without extension)" )
 options.register( "outNameFit", "lorentzFit.txt", VarParsing.multiplicity.singleton, VarParsing.varType.string, "name and path of the output files (without extension)" )
-#options.register( "maxEvents", -1, VarParsing.multiplicity.singleton, VarParsing.varType.int, "maximum events" )
 options.parseArguments()
 
 #if options.maxEvents is -1: # maxEvents is set in VarParsing class by default to -1
