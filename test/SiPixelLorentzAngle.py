@@ -1,4 +1,5 @@
-# cmsRun test.py outName=testrun.root outNameFit=testrun.txt maxEvents=10 inputFiles=/store/data/Run2018C/SingleMuon/ALCARECO/SiPixelCalSingleMuon-ForPixelALCARECO_UL2018-v1/00000/698BAF88-2250-894B-A47B-88749735A6CC.root
+# cmsRun SiPixelLorentzAngle.py outName=testrun.root outNameFit=testrun.txt maxEvents=10 inputFiles=/store/data/Run2018C/SingleMuon/ALCARECO/SiPixelCalSingleMuon-ForPixelALCARECO_UL2018-v1/00000/698BAF88-2250-894B-A47B-88749735A6CC.root
+# CMSSW_11_2_0_pre10
 
 import FWCore.ParameterSet.Config as cms
 import sys
@@ -18,15 +19,9 @@ from Configuration.Eras.Era_Run2_2018_cff import Run2_2018
 
 process = cms.Process("LA", Run2_2018)
 process.load('Configuration.StandardSequences.Services_cff')
-#process.load("Configuration.StandardSequences.Geometry_cff")
-#process.load('Configuration/StandardSequences/GeometryExtended_cff')
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
-#process.load('Configuration/StandardSequences/MagneticField_AutoFromDBCurrent_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
-# process.load("Configuration.StandardSequences.FakeConditions_cff")
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-# check for the correct tag on https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideFrontierConditions
-#process.GlobalTag.globaltag = "GR09_PV7::All"
 process.GlobalTag.globaltag = "112X_dataRun2_v7"
 
 
@@ -47,18 +42,6 @@ process.MeasurementTrackerEvent.inactiveStripDetectorLabels = cms.VInputTag()
 
 
 process.load("RecoTracker.TransientTrackingRecHit.TransientTrackingRecHitBuilderWithoutRefit_cfi")
-# put here the tag of the tracks you want to use
-# alcareco samples have special names for the tracks, in normal reco samples generalTracks can be used
-#process.TrackRefitter.src = "generalTracks"
-#process.TrackRefitter.src = "ALCARECOTkAlZMuMu"
-
-# https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideTrackRecoSequences#RefTr
-# Some use-cases require performing a new Final Fit over already reconstructed Tracks. For examples, for alignment studies, you can refit Tracks after having modified the geometry of detectors. Refitting tracks is also useful if you need access to their Trajectory.
-# We use the same geometry, so we just want ot access the trajectory
-# The TrackRefitter class is responsible for this task: it takes as input a collection of reco::Tracks, and puts into the event a new TrackCollection containing refitted Tracks.
-
-# https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideTransientTracks
-# A TransientTracks has a pointer to the magnetic field, and can be given a pointer to the geometry as well.
 
 process.TrackRefitter.src = 'ALCARECOSiPixelCalSingleMuon'
 process.TrackRefitter.TrajectoryInEvent = True
@@ -70,9 +53,7 @@ process.MessageLogger = cms.Service("MessageLogger",
         threshold = cms.untracked.string('ERROR')
     ),
 )
-#SiPixelLorentzAngle
 
-#from SiPixelTools.LA-Calibration.SiPixelLorentzAngle_cfi import *
 process.lorentzAngle = cms.EDAnalyzer("SiPixelLorentzAngle",
 	src = cms.string("TrackRefitter"),
 	fileName = cms.string(options.outName),
@@ -99,22 +80,19 @@ process.p = cms.Path(process.offlineBeamSpot*
                      process.TrackRefitter*
                      process.lorentzAngle)
                      
-#process.p = cms.EndPath(process.myout)
+
 
 # uncomment this if you want to write out the new CMSSW root file (very large)
-# process.outpath = cms.EndPath(process.myout)
+# process.p = cms.EndPath(process.myout)
+
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(int(options.maxEvents))
 )
 
-process.options.numberOfThreads=cms.untracked.uint32(8)
-
-#process.options.numberOfThreads=cms.untracked.uint32(2)
+# process.options.numberOfThreads=cms.untracked.uint32(8)
 
 process.source = cms.Source("PoolSource",
 	#put here the sample you want to use
-#    fileNames = cms.untracked.vstring('file:/uscms/home/wwei/nobackup/LA/CMSSW_11_2_0_pre10/src/trial2/SiPixelCalSingleMuon_1.root'),
     fileNames = cms.untracked.vstring(options.inputFiles),
 #   skipEvents = cms.untracked.uint32(100)
-#
 )
